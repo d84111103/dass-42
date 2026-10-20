@@ -29,7 +29,7 @@
       <p>透過動態控制切換，檢視各年齡層在 DASS-42 憂鬱、焦慮與壓力三分量表之得分趨勢與嚴重度分布。</p>
     </div>
 
-    <!-- 控制區 -->
+    <!-- Control Panel -->
     <div class="control-panel">
       <div class="control-group">
         <span class="control-label">圖表模式：</span>
@@ -38,26 +38,26 @@
       </div>
 
       <div class="control-group" id="scaleSelectorContainer">
-        <!-- 由 JavaScript 動態繪製選擇控制項 -->
+        <!-- Dynamic Scale Controls injected via JS -->
       </div>
     </div>
 
-    <!-- 圖表 Canvas -->
+    <!-- Chart Container -->
     <div class="chart-container">
       <canvas id="mainChart"></canvas>
     </div>
 
-    <!-- 動態統計表格 -->
+    <!-- Data Table -->
     <h2 style="margin-bottom: 1rem; color: var(--text-dark);">📋 統計數據細節</h2>
     <div class="table-wrapper" id="tableContainer">
-      <!-- 由 JavaScript 動態繪製表格 -->
+      <!-- Injected via JS -->
     </div>
 
-    <!-- 數據註解與切點說明 -->
+    <!-- Explanatory Notes -->
     <div class="note-box">
       <h4>📌 數據與指標說明</h4>
       <p>1. <strong>分數範圍與轉換</strong>：DASS-42 每個分量表滿分為 42 分（已依據心理測驗標準轉換為 0–3 計分模式）。得分越高代表情緒困擾越嚴重。</p>
-      <p>2. <strong>信賴區間 (95% CI)</strong>：折線圖點上的垂直誤差線代表 95% 信賴區間，數值範圍越窄代表估計精確度越高。</p>
+      <p>2. <strong>信賴區間 (95% CI)</strong>：折線圖點上的垂直誤差線代表 95% 信賴區間（$\text{Mean} \pm 1.96 \times \text{SE}$），數值範圍越窄代表估計精確度越高。</p>
       <p>3. <strong>DASS-42 嚴重度切點標準</strong>：</p>
       <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.5;">
         <li><strong>憂鬱 (Depression)</strong>：正常 0–9 | 輕度 10–13 | 中度 14–20 | 重度 21–27 | 極重度 28+</li>
@@ -69,7 +69,7 @@
 
   <footer>
     <p>心理學系研究專題小組 | DASS-42 心理健康資料分析</p>
-    <p>組員：張三、李四、王五（專題組別：第 4 組）</p>
+    <p>組員：_（專題組別：第 _ 組）</p>
   </footer>
 
   <script>
@@ -98,7 +98,7 @@
     let selectedBarScale = 'Depression';
     let myChart = null;
 
-    // 誤差線外掛插件 (95% CI)
+    // Error bar plugin for Chart.js line chart
     const errorBarPlugin = {
       id: 'errorBarPlugin',
       afterDatasetsDraw(chart) {
@@ -245,6 +245,7 @@
         });
         renderLineTable();
       } else {
+        // Stacked Bar Mode
         const datasets = severityLevels.map((lvl, idx) => ({
           label: lvl,
           data: ageGroups.map(g => statsData[g][selectedBarScale].sev[lvl]),
