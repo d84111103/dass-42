@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研究結果 | 年齡與憂鬱、焦慮、壓力的關係</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        🧠 心理學專題：DASS-42 研究
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">首頁</a></li>
+        <li><a href="results.html" class="nav-link active">研究結果</a></li>
+        <li><a href="ask.html" class="nav-link">常見問答</a></li>
+        <li><a href="about.html" class="nav-link">關於研究</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <h1>📈 研究結果與互動分析圖表</h1>
+      <p>透過動態控制切換，檢視各年齡層在 DASS-42 憂鬱、焦慮與壓力三分量表之得分趨勢與嚴重度分布。</p>
+    </div>
+
+    <!-- 控制區 -->
+    <div class="control-panel">
+      <div class="control-group">
+        <span class="control-label">圖表模式：</span>
+        <button id="btnLineMode" class="btn-toggle active" onclick="switchChartType('line')">📈 各分量平均數 (折線圖)</button>
+        <button id="btnBarMode" class="btn-toggle" onclick="switchChartType('bar')">📊 嚴重度分布 (堆疊圖)</button>
+      </div>
+
+      <div class="control-group" id="scaleSelectorContainer">
+        <!-- 由 JavaScript 動態繪製選擇控制項 -->
+      </div>
+    </div>
+
+    <!-- 圖表 Canvas -->
+    <div class="chart-container">
+      <canvas id="mainChart"></canvas>
+    </div>
+
+    <!-- 動態統計表格 -->
+    <h2 style="margin-bottom: 1rem; color: var(--text-dark);">📋 統計數據細節</h2>
+    <div class="table-wrapper" id="tableContainer">
+      <!-- 由 JavaScript 動態繪製表格 -->
+    </div>
+
+    <!-- 數據註解與切點說明 -->
+    <div class="note-box">
+      <h4>📌 數據與指標說明</h4>
+      <p>1. <strong>分數範圍與轉換</strong>：DASS-42 每個分量表滿分為 42 分（已依據心理測驗標準轉換為 0–3 計分模式）。得分越高代表情緒困擾越嚴重。</p>
+      <p>2. <strong>信賴區間 (95% CI)</strong>：折線圖點上的垂直誤差線代表 95% 信賴區間，數值範圍越窄代表估計精確度越高。</p>
+      <p>3. <strong>DASS-42 嚴重度切點標準</strong>：</p>
+      <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.5;">
+        <li><strong>憂鬱 (Depression)</strong>：正常 0–9 | 輕度 10–13 | 中度 14–20 | 重度 21–27 | 極重度 28+</li>
+        <li><strong>焦慮 (Anxiety)</strong>：正常 0–7 | 輕度 8–9 | 中度 10–14 | 重度 15–19 | 極重度 20+</li>
+        <li><strong>壓力 (Stress)</strong>：正常 0–14 | 輕度 15–18 | 中度 19–25 | 重度 26–33 | 極重度 34+</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <p>心理學系研究專題小組 | DASS-42 心理健康資料分析</p>
+    <p>組員：張三、李四、王五（專題組別：第 4 組）</p>
+  </footer>
+
+  <script>
+    const statsData = {
+      "10–19": { "n": 1421, "Depression": { "mean": 22.76, "sd": 12.04, "se": 0.32, "ci95": 0.63, "sev": { "正常": 17.73, "輕度": 7.39, "中度": 18.3, "重度": 17.38, "極重度": 39.2 } }, "Anxiety": { "mean": 18.3, "sd": 10.21, "se": 0.27, "ci95": 0.53, "sev": { "正常": 17.45, "輕度": 6.05, "中度": 16.54, "重度": 15.41, "極重度": 44.55 } }, "Stress": { "mean": 22.67, "sd": 10.31, "se": 0.27, "ci95": 0.54, "sev": { "正常": 24.35, "輕度": 11.26, "中度": 22.38, "重度": 24.21, "極重度": 17.8 } } },
+      "20–29": { "n": 2176, "Depression": { "mean": 20.05, "sd": 11.88, "se": 0.25, "ci95": 0.5, "sev": { "正常": 23.25, "輕度": 10.52, "中度": 19.76, "重度": 16.5, "極重度": 29.96 } }, "Anxiety": { "mean": 15.37, "sd": 9.72, "se": 0.21, "ci95": 0.41, "sev": { "正常": 24.68, "輕度": 7.81, "中度": 20.17, "重度": 15.67, "極重度": 31.66 } }, "Stress": { "mean": 20.57, "sd": 10.19, "se": 0.22, "ci95": 0.43, "sev": { "正常": 31.02, "輕度": 12.68, "中度": 23.94, "重度": 19.94, "極重度": 12.41 } } },
+      "30–39": { "n": 362, "Depression": { "mean": 17.45, "sd": 12.6, "se": 0.66, "ci95": 1.3, "sev": { "正常": 35.08, "輕度": 10.5, "中度": 15.19, "重度": 11.88, "極重度": 27.35 } }, "Anxiety": { "mean": 11.1, "sd": 9.05, "se": 0.48, "ci95": 0.93, "sev": { "正常": 45.03, "輕度": 9.12, "中度": 18.78, "重度": 10.22, "極重度": 16.85 } }, "Stress": { "mean": 18.3, "sd": 10.67, "se": 0.56, "ci95": 1.1, "sev": { "正常": 41.16, "輕度": 15.47, "中度": 15.19, "重度": 17.68, "極重度": 10.5 } } },
+      "40–49": { "n": 120, "Depression": { "mean": 14.74, "sd": 12.31, "se": 1.12, "ci95": 2.2, "sev": { "正常": 43.33, "輕度": 11.67, "中度": 15.83, "重度": 9.17, "極重度": 20.0 } }, "Anxiety": { "mean": 9.52, "sd": 9.02, "se": 0.82, "ci95": 1.61, "sev": { "正常": 52.5, "輕度": 10.0, "中度": 14.17, "重度": 7.5, "極重度": 15.83 } }, "Stress": { "mean": 17.18, "sd": 10.87, "se": 0.99, "ci95": 1.94, "sev": { "正常": 45.0, "輕度": 14.17, "中度": 15.0, "重度": 13.33, "極重度": 12.5 } } },
+      "50+": { "n": 96, "Depression": { "mean": 14.67, "sd": 13.04, "se": 1.33, "ci95": 2.61, "sev": { "正常": 51.04, "輕度": 8.33, "中度": 13.54, "重度": 7.29, "極重度": 19.79 } }, "Anxiety": { "mean": 8.11, "sd": 8.61, "se": 0.88, "ci95": 1.72, "sev": { "正常": 61.46, "輕度": 6.25, "中度": 11.46, "重度": 7.29, "極重度": 13.54 } }, "Stress": { "mean": 15.2, "sd": 10.66, "se": 1.09, "ci95": 2.13, "sev": { "正常": 56.25, "輕度": 11.46, "中度": 14.58, "重度": 10.42, "極重度": 7.29 } } }
+    };
+
+    const ageGroups = Object.keys(statsData);
+    const labelsWithN = ageGroups.map(g => `${g} (n=${statsData[g].n})`);
+
+    const scaleConfigs = {
+      Depression: { name: '憂鬱', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.2)' },
+      Anxiety: { name: '焦慮', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.2)' },
+      Stress: { name: '壓力', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.2)' }
+    };
+
+    const severityLevels = ['正常', '輕度', '中度', '重度', '極重度'];
+    const severityColors = ['#10b981', '#84cc16', '#eab308', '#f97316', '#ef4444'];
+
+    let currentChartType = 'line';
+    let selectedLineScales = ['Depression', 'Anxiety', 'Stress'];
+    let selectedBarScale = 'Depression';
+    let myChart = null;
+
+    // 誤差線外掛插件 (95% CI)
+    const errorBarPlugin = {
+      id: 'errorBarPlugin',
+      afterDatasetsDraw(chart) {
+        if (chart.config.type !== 'line') return;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.lineWidth = 1.8;
+
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+          const meta = chart.getDatasetMeta(datasetIndex);
+          if (meta.hidden) return;
+          const ciValues = dataset.ci95;
+          ctx.strokeStyle = dataset.borderColor;
+
+          meta.data.forEach((element, index) => {
+            const x = element.x;
+            const y = element.y;
+            const ci = ciValues[index];
+            const yScale = chart.scales.y;
+            const yMin = yScale.getPixelForValue(dataset.data[index] - ci);
+            const yMax = yScale.getPixelForValue(dataset.data[index] + ci);
+
+            ctx.beginPath();
+            ctx.moveTo(x, yMin);
+            ctx.lineTo(x, yMax);
+            ctx.moveTo(x - 5, yMin);
+            ctx.lineTo(x + 5, yMin);
+            ctx.moveTo(x - 5, yMax);
+            ctx.lineTo(x + 5, yMax);
+            ctx.stroke();
+          });
+        });
+        ctx.restore();
+      }
+    };
+
+    Chart.register(errorBarPlugin);
+
+    function initControls() {
+      const container = document.getElementById('scaleSelectorContainer');
+      if (currentChartType === 'line') {
+        container.innerHTML = `
+          <span class="control-label">分量表勾選：</span>
+          ${Object.keys(scaleConfigs).map(key => `
+            <label class="checkbox-label">
+              <input type="checkbox" value="${key}" ${selectedLineScales.includes(key) ? 'checked' : ''} onchange="handleLineScaleChange(this)">
+              ${scaleConfigs[key].name}
+            </label>
+          `).join('')}
+        `;
+      } else {
+        container.innerHTML = `
+          <span class="control-label">選擇分量表：</span>
+          ${Object.keys(scaleConfigs).map(key => `
+            <label class="radio-label">
+              <input type="radio" name="barScale" value="${key}" ${selectedBarScale === key ? 'checked' : ''} onchange="handleBarScaleChange(this)">
+              ${scaleConfigs[key].name}
+            </label>
+          `).join('')}
+        `;
+      }
+    }
+
+    function switchChartType(type) {
+      currentChartType = type;
+      document.getElementById('btnLineMode').classList.toggle('active', type === 'line');
+      document.getElementById('btnBarMode').classList.toggle('active', type === 'bar');
+      initControls();
+      updateChartAndTable();
+    }
+
+    function handleLineScaleChange(cb) {
+      const checkedBoxes = Array.from(document.querySelectorAll('#scaleSelectorContainer input[type="checkbox"]:checked'));
+      if (checkedBoxes.length === 0) {
+        cb.checked = true;
+        alert('請至少保留一個分量表！');
+        return;
+      }
+      selectedLineScales = checkedBoxes.map(b => b.value);
+      updateChartAndTable();
+    }
+
+    function handleBarScaleChange(rb) {
+      selectedBarScale = rb.value;
+      updateChartAndTable();
+    }
+
+    function updateChartAndTable() {
+      if (myChart) myChart.destroy();
+      const ctx = document.getElementById('mainChart').getContext('2d');
+
+      if (currentChartType === 'line') {
+        const datasets = selectedLineScales.map(scaleKey => {
+          const cfg = scaleConfigs[scaleKey];
+          const means = ageGroups.map(g => statsData[g][scaleKey].mean);
+          const sds = ageGroups.map(g => statsData[g][scaleKey].sd);
+          const cis = ageGroups.map(g => statsData[g][scaleKey].ci95);
+
+          return {
+            label: cfg.name,
+            data: means,
+            sds: sds,
+            ci95: cis,
+            borderColor: cfg.color,
+            backgroundColor: cfg.bgColor,
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            tension: 0.15,
+            fill: false
+          };
+        });
+
+        myChart = new Chart(ctx, {
+          type: 'line',
+          data: { labels: labelsWithN, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 0,
+                max: 42,
+                title: { display: true, text: '分量表總分 (0–42)', font: { size: 14, weight: 'bold' } }
+              },
+              x: {
+                title: { display: true, text: '年齡組 (人數)', font: { size: 14, weight: 'bold' } }
+              }
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label(ctx) {
+                    const ds = ctx.dataset;
+                    const val = ctx.parsed.y;
+                    const sd = ds.sds[ctx.dataIndex];
+                    const ci = ds.ci95[ctx.dataIndex];
+                    return `${ds.label}: 平均數 ${val.toFixed(2)} (SD: ${sd.toFixed(2)}, 95% CI: ±${ci.toFixed(2)})`;
+                  }
+                }
+              }
+            }
+          }
+        });
+        renderLineTable();
+      } else {
+        const datasets = severityLevels.map((lvl, idx) => ({
+          label: lvl,
+          data: ageGroups.map(g => statsData[g][selectedBarScale].sev[lvl]),
+          backgroundColor: severityColors[idx],
+          borderWidth: 1
+        }));
+
+        myChart = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: labelsWithN, datasets: datasets },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                stacked: true,
+                min: 0,
+                max: 100,
+                title: { display: true, text: '百分比 (%)', font: { size: 14, weight: 'bold' } }
+              },
+              y: {
+                stacked: true,
+                title: { display: true, text: '年齡組', font: { size: 14, weight: 'bold' } }
+              }
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label(ctx) {
+                    const ageG = ageGroups[ctx.dataIndex];
+                    const totalN = statsData[ageG].n;
+                    const pct = ctx.parsed.x;
+                    const approxN = Math.round((pct / 100) * totalN);
+                    return `${ctx.dataset.label}: ${pct.toFixed(2)}% (約 ${approxN} 人)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+        renderBarTable();
+      }
+    }
+
+    function renderLineTable() {
+      const container = document.getElementById('tableContainer');
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>年齡組</th>
+              <th>樣本數 (n)</th>
+              ${selectedLineScales.map(s => `
+                <th>${scaleConfigs[s].name} 平均數</th>
+                <th>${scaleConfigs[s].name} 標準差</th>
+                <th>95% 信賴區間</th>
+              `).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${ageGroups.map(g => `
+              <tr>
+                <td><strong>${g}</strong></td>
+                <td>${statsData[g].n}</td>${selectedLineScales.map(s => `
+                  <td>${statsData[g][s].mean.toFixed(2)}</td>
+                  <td>${statsData[g][s].sd.toFixed(2)}</td>
+                  <td>±${statsData[g][s].ci95.toFixed(2)}</td>
+                `).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      container.innerHTML = html;
+    }
+
+    function renderBarTable() {
+      const container = document.getElementById('tableContainer');
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>年齡組</th>
+              <th>樣本數 (n)</th>
+              ${severityLevels.map(lvl => `<th>${lvl} (%)</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${ageGroups.map(g => `
+              <tr>
+                <td><strong>${g}</strong></td>
+                <td>${statsData[g].n}</td>${severityLevels.map(lvl => `
+                  <td>${statsData[g][selectedBarScale].sev[lvl].toFixed(2)}%</td>
+                `).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      container.innerHTML = html;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initControls();
+      updateChartAndTable();
+    });
+  </script>
+
+</body>
+</html>
